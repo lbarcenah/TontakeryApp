@@ -13,7 +13,14 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsString, IsUUID, MaxLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsIn,
+  IsEmail,
+  IsString,
+  IsUUID,
+  MaxLength,
+} from 'class-validator';
 import { Request, Response } from 'express';
 import { DataSource } from 'typeorm';
 import { merge, of, timer } from 'rxjs';
@@ -32,6 +39,11 @@ class TrialDto {
   @IsEmail()
   @MaxLength(254)
   email: string;
+}
+class TagDto {
+  @IsUUID() messageId: string;
+  @IsIn(['racist', 'sexist']) category: string;
+  @IsBoolean() selected: boolean;
 }
 class VoteDto {
   @IsUUID() messageId: string;
@@ -94,6 +106,24 @@ export class TontakeryController {
     @Body() dto: VoteDto,
   ) {
     return this.game.vote(req.userId, id, dto.messageId);
+  }
+  @Put('rounds/:id/tag') @UseGuards(SessionGuard) tag(
+    @Req() req: AuthRequest,
+    @Param('id', ParseUUIDPipe) id: string,
+    @Body() dto: TagDto,
+  ) {
+    return this.game.tag(
+      req.userId,
+      id,
+      dto.messageId,
+      dto.category,
+      dto.selected,
+    );
+  }
+  @Get('awards/monthly') @UseGuards(SessionGuard) monthly(
+    @Query('month') month?: string,
+  ) {
+    return this.game.monthly(month);
   }
   @Get('history') @UseGuards(SessionGuard) history(@Query('page') page = '0') {
     return this.game.history(

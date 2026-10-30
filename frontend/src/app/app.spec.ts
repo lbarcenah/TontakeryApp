@@ -67,4 +67,48 @@ describe('Tontakery participation', () => {
     app.confirm();
     expect(app.confirming).toBeFalse();
   });
+  it('sends an explicit idempotent tag state without spending the vote', async () => {
+    const fetchSpy = spyOn(window, 'fetch').and.callFake(async () => new Response('{"ok":true}'));
+    app.round.update((r) => ({ ...r!, voteId: 'voted', tags: [] }));
+    await app.tag('phrase', 'racist');
+    expect(JSON.parse(fetchSpy.calls.mostRecent().args[1]!.body as string)).toEqual({
+      messageId: 'phrase',
+      category: 'racist',
+      selected: true,
+    });
+    app.round.update((r) => ({ ...r!, tags: [{ messageId: 'phrase', category: 'racist' }] }));
+    await app.tag('phrase', 'racist');
+    expect(JSON.parse(fetchSpy.calls.mostRecent().args[1]!.body as string).selected).toBeFalse();
+    expect(app.round()!.voteId).toBe('voted');
+  });
+  it('does not let a slower previous month overwrite a newer selection', async () => {
+    let resolveFirst!: (value: Response) => void;
+    spyOn(window, 'fetch').and.returnValues(
+      new Promise<Response>((resolve) => (resolveFirst = resolve)),
+      Promise.resolve(
+        new Response(
+          JSON.stringify({
+            month: '2026-02',
+            closed: false,
+            months: ['2026-02'],
+            categories: { votes: [], racist: [], sexist: [] },
+          }),
+        ),
+      ),
+    );
+    const first = app.loadMonthly('2026-01');
+    await app.loadMonthly('2026-02');
+    resolveFirst(
+      new Response(
+        JSON.stringify({
+          month: '2026-01',
+          closed: true,
+          months: ['2026-01'],
+          categories: { votes: [], racist: [], sexist: [] },
+        }),
+      ),
+    );
+    await first;
+    expect(app.selectedMonth).toBe('2026-02');
+  });
 });

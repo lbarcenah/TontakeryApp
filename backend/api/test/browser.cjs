@@ -18,7 +18,7 @@ const baseURL = process.env.TEST_APP_ORIGIN || 'http://localhost:4201';
   const errors = [];
   try {
     await db.query(
-      'TRUNCATE tk_winners,tk_votes,tk_messages,tk_rounds,tk_sessions,tk_oauth,tk_users CASCADE',
+      'TRUNCATE tk_award_months,tk_winners,tk_votes,tk_messages,tk_rounds,tk_sessions,tk_oauth,tk_users CASCADE',
     );
     const users = [];
     for (const name of ['Alice', 'Bob']) {

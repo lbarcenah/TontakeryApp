@@ -32,3 +32,8 @@ export function nextEnd(start: Date): Date {
   const p = parts(start);
   return madridNine(Number(p.year), Number(p.month), Number(p.day) + 1);
 }
+
+export function monthKey(now: Date): string {
+  const p = parts(now);
+  return `${p.year}-${p.month}`;
+}

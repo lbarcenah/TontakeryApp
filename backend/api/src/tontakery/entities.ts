@@ -38,6 +38,7 @@ export class Publication {
   @Column('text') body: string;
   @Column('timestamptz') created_at: Date;
   @Column('uuid') request_key: string;
+  @Column('text', { nullable: true }) author_name: string;
 }
 @Entity('tk_votes')
 export class Vote {
@@ -54,6 +55,28 @@ export class Winner {
   @Column('text') body: string;
   @Column('integer') votes: number;
 }
+@Entity('tk_tags')
+export class Tag {
+  @PrimaryColumn('uuid') message_id: string;
+  @PrimaryColumn('uuid') user_id: string;
+  @PrimaryColumn('text') category: string;
+  @Column('uuid') round_id: string;
+}
+@Entity('tk_award_months')
+export class AwardMonth {
+  @PrimaryColumn('text') month: string;
+  @Column('timestamptz') finalized_at: Date;
+}
+@Entity('tk_monthly_awards')
+export class MonthlyAward {
+  @PrimaryColumn('text') month: string;
+  @PrimaryColumn('text') category: string;
+  @PrimaryColumn('uuid') message_id: string;
+  @Column('text') author_name: string;
+  @Column('text') body: string;
+  @Column('integer') score: number;
+  @Column('integer') rank: number;
+}
 export const entities = [
   User,
   Session,
@@ -62,4 +85,7 @@ export const entities = [
   Publication,
   Vote,
   Winner,
+  Tag,
+  AwardMonth,
+  MonthlyAward,
 ];

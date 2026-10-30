@@ -56,7 +56,7 @@ Las sesiones duran siete días, se guardan en PostgreSQL como hashes de tokens a
 - Un voto activo por persona. Puede cambiarse hasta el cierre; no se permite votar publicaciones propias.
 - Autores y recuentos ocultos durante la jornada. La API solo informa si una publicación pertenece al usuario actual y cuál es su voto.
 - Ganan todas las frases empatadas con el máximo de votos. Los votos no se suman por autor. Sin votos, no hay ganador.
-- Solo se revelan los autores ganadores. El historial conserva fecha de cierre, nombres, frases y recuentos; no permite consultar conversaciones antiguas ni identidades de votantes.
+- Solo se revelan los ganadores diarios y los autores de los podios mensuales. El historial conserva fecha de cierre, nombres, frases y recuentos; no permite consultar conversaciones antiguas ni identidades de votantes.
 
 El backend conserva las relaciones entre usuarios y votos para aplicar las reglas; el anonimato es frente a participantes, no frente al administrador de la base de datos. El nombre del ganador y su frase se guardan como copia histórica.
 
@@ -170,3 +170,21 @@ docker compose -f docker-compose.dev.yml up -d backend
 ```
 
 En producción el endpoint está deshabilitado aunque se active la variable. Los mensajes de prueba existentes no se borran automáticamente. Google sigue disponible en paralelo.
+
+## Tarjetas y premios mensuales
+
+En las frases ajenas aparecen dos tarjetas abajo a la izquierda: negra «Racista» y morada «Machista». Son valoraciones del contenido por los participantes; no etiquetas de identidad de sus autores. Puedes marcar tantas frases de la jornada como quieras, en ambas categorías. Cada persona aporta como máximo una marca por frase y categoría; pulsar de nuevo la retira. No se permite marcar una frase propia ni cambiar marcas después del cierre diario.
+
+Las tarjetas no consumen el voto normal, no alteran el ganador diario y no conceden publicaciones extra. Solo se muestran tus propias selecciones; los recuentos y quién ha marcado cada frase nunca se publican durante la competición. Las pestañas se sincronizan mediante avisos personales SSE.
+
+**Premios del mes** contiene tres rankings de frases: más votadas, más señaladas como racistas y más señaladas como machistas. Se guardan los tres primeros niveles de puntuación de cada categoría, incluidos todos los empates. Por ejemplo, 8/8/5/2 votos se muestran como puestos 1/1/2/3. Una misma frase puede aparecer en varias categorías. No se suman las frases de un mismo autor.
+
+Cada frase pertenece al mes de la **fecha de cierre de su jornada en Madrid**: una frase publicada el 31 de enero cuya jornada termina el 1 de febrero a las 09:00 cuenta para febrero. El mes se cierra a las 00:00 de Madrid del día 1; el proceso automático lo materializa en su siguiente comprobación y también lo recupera tras reinicios. Durante el mes solo se muestra un aviso de resultados pendientes. Al cerrar, se revelan frase, autor, puntuación y puesto de los podios. El selector permite consultar meses anteriores. Una categoría sin votos o marcas no tiene premiados.
+
+La migración `MonthlyAwards1793300000000` añade las tablas de marcas y resultados y una copia histórica del nombre del autor. No borra publicaciones, usuarios, votos ni ganadores existentes. Para frases anteriores a esta función utiliza el nombre histórico del ganador diario, cuando existe, o el nombre disponible del usuario al migrar. Los resultados mensuales cerrados se guardan una sola vez y no cambian al renombrar un usuario.
+
+Nuevos endpoints (requieren sesión; las escrituras también exigen CSRF):
+
+- `PUT /api/rounds/:id/tag`: `{messageId, category: "racist" | "sexist", selected: boolean}`. La selección explícita hace seguros los reintentos.
+- `GET /api/awards/monthly?month=YYYY-MM`: mes solicitado (por defecto el actual), meses disponibles, estado de cierre y podios. No devuelve resultados del mes abierto.
+- `GET /api/rounds/current` incluye `tags`, exclusivamente las selecciones del usuario autenticado.

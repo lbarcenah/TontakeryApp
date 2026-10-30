@@ -5,11 +5,27 @@ import { ButtonModule } from 'primeng/button';
 import { DialogModule } from 'primeng/dialog';
 import { InputTextModule } from 'primeng/inputtext';
 import { TextareaModule } from 'primeng/textarea';
+import { TooltipModule } from 'primeng/tooltip';
 interface Message {
   id: string;
   body: string;
   createdAt: string;
   mine: boolean;
+}
+type TagCategory = 'racist' | 'sexist';
+interface MonthlyEntry {
+  messageId: string;
+  authorName: string;
+  body: string;
+  score: number;
+  rank: number;
+}
+interface MonthlyAwards {
+  month: string;
+  currentMonth: string;
+  closed: boolean;
+  months: string[];
+  categories: Record<'votes' | TagCategory, MonthlyEntry[]>;
 }
 interface Round {
   id: string;
@@ -19,6 +35,7 @@ interface Round {
   messages: Message[];
   remaining: number;
   voteId: string | null;
+  tags?: { messageId: string; category: TagCategory }[];
 }
 interface Result {
   id: string;
@@ -37,6 +54,7 @@ interface User {
 @Component({
   selector: 'app-root',
   imports: [
+    TooltipModule,
     InputTextModule,
     FormsModule,
     TranslatePipe,
@@ -58,7 +76,12 @@ export class App implements OnInit, OnDestroy {
   error = signal('');
   connected = signal(false);
   now = signal(Date.now());
-  view = signal<'chat' | 'history'>('chat');
+  view = signal<'chat' | 'history' | 'monthly'>('chat');
+  monthly = signal<MonthlyAwards | null>(null);
+  monthlyLoading = signal(false);
+  selectedMonth = '';
+  readonly awardCategories = ['votes', 'racist', 'sexist'] as const;
+  private monthlyRequest = 0;
   page = signal(0);
   trialEnabled = signal(false);
   trialEmail = '';
@@ -160,6 +183,7 @@ export class App implements OnInit, OnDestroy {
             ROUND_CLOSED: 'roundClosed',
             MESSAGE_LIMIT: 'limit',
             OWN_VOTE: 'ownVote',
+            OWN_TAG: 'ownTag',
             INVALID_MESSAGE: 'invalidMessage',
             INVALID_CSRF: 'sessionExpired',
           } as Record<string, string>
@@ -197,6 +221,7 @@ export class App implements OnInit, OnDestroy {
       'roundClosed',
       'limit',
       'ownVote',
+      'ownTag',
       'invalidMessage',
       'requestFailed',
       'sessionExpired',
@@ -261,6 +286,7 @@ export class App implements OnInit, OnDestroy {
       this.round.set(r);
       this.previous.set(h.items[0] || null);
       if (this.view() === 'history') await this.loadHistory();
+      if (this.view() === 'monthly') await this.loadMonthly(this.selectedMonth || undefined);
     } catch (e) {
       this.showError(e);
     } finally {
@@ -331,6 +357,56 @@ export class App implements OnInit, OnDestroy {
       await this.refresh();
       this.busy.set(false);
     }
+  }
+  isTagged(messageId: string, category: TagCategory) {
+    return !!this.round()?.tags?.some((t) => t.messageId === messageId && t.category === category);
+  }
+  async tag(messageId: string, category: TagCategory) {
+    const r = this.round();
+    if (!r || this.busy()) return;
+    this.busy.set(true);
+    this.error.set('');
+    try {
+      await this.api('rounds/' + r.id + '/tag', 'PUT', {
+        messageId,
+        category,
+        selected: !this.isTagged(messageId, category),
+      });
+      this.channel?.postMessage('sync');
+    } catch (e) {
+      this.showError(e);
+    } finally {
+      await this.refresh();
+      this.busy.set(false);
+    }
+  }
+  async showMonthly() {
+    this.view.set('monthly');
+    await this.loadMonthly(this.selectedMonth || undefined);
+  }
+  async loadMonthly(month?: string) {
+    const request = ++this.monthlyRequest;
+    this.monthlyLoading.set(true);
+    try {
+      const result = await this.api<MonthlyAwards>(
+        'awards/monthly' + (month ? '?month=' + encodeURIComponent(month) : ''),
+      );
+      if (request === this.monthlyRequest) {
+        this.monthly.set(result);
+        this.selectedMonth = result.month;
+      }
+    } catch (e) {
+      if (request === this.monthlyRequest) this.showError(e);
+    } finally {
+      if (request === this.monthlyRequest) this.monthlyLoading.set(false);
+    }
+  }
+  formatMonth(month: string) {
+    return new Intl.DateTimeFormat(this.i18n.getCurrentLang() === 'es' ? 'es-ES' : 'en-GB', {
+      month: 'long',
+      year: 'numeric',
+      timeZone: 'Europe/Madrid',
+    }).format(new Date(month + '-15T12:00:00Z'));
   }
   async logout() {
     try {
