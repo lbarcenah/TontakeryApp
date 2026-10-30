@@ -103,21 +103,21 @@ textarea {
 }
 .tag-actions {
   margin-right: auto;
-  gap: 24px;
-  min-height: 88px;
-  padding: 12px 8px;
+  gap: 18px;
+  min-height: 60px;
+  padding: 8px 5px;
 }
 .site-shell .p-button.tag-card {
   position: relative;
   display: inline-flex;
-  flex: 0 0 44px;
-  width: 44px;
-  height: 60px;
+  flex: 0 0 28px;
+  width: 28px;
+  height: 40px;
   padding: 0;
-  border: 3px solid #17101c;
-  border-radius: 5px;
+  border: 2px solid #17101c;
+  border-radius: 3px;
   color: white;
-  box-shadow: 4px 4px 0 #17101c;
+  box-shadow: 3px 3px 0 #17101c;
   transform: rotate(-8deg);
   transform-origin: center bottom;
   transition: transform 180ms cubic-bezier(.2,1.5,.5,1), box-shadow 180ms;
@@ -132,7 +132,7 @@ textarea {
 .site-shell .p-button.tag-purple:not(:disabled):active { background: #823fc1; }
 .referee-card-face {
   position: absolute;
-  inset: 4px;
+  inset: 3px;
   border: 1px solid #ffffff50;
   border-radius: 2px;
   background: linear-gradient(135deg, #ffffff20 0 25%, transparent 26%);
@@ -140,7 +140,7 @@ textarea {
 }
 .site-shell .p-button.tag-card:not(:disabled):hover {
   transform: translateY(-4px) rotate(-3deg) scale(1.1);
-  box-shadow: 5px 6px 0 #17101c;
+  box-shadow: 3px 4px 0 #17101c;
 }
 .site-shell .p-button.tag-card:focus-visible {
   outline: 3px dashed #17101c;
@@ -151,25 +151,25 @@ textarea {
   transform: translateY(-5px) rotate(4deg) scale(1.22);
   outline: 3px solid #ffe66b;
   outline-offset: 3px;
-  box-shadow: 6px 7px 0 #17101c;
+  box-shadow: 4px 5px 0 #17101c;
   z-index: 1;
 }
 .site-shell .p-button.tag-card.tag-selected { animation: referee-pop 450ms both; }
 .card-check {
   position: absolute;
-  right: -10px;
-  top: -10px;
+  right: -7px;
+  top: -7px;
   display: grid;
   place-items: center;
-  width: 23px;
-  height: 23px;
+  width: 17px;
+  height: 17px;
   border: 2px solid #17101c;
   border-radius: 2px;
   background: #27d8bd;
   color: #17101c;
   box-shadow: 2px 2px 0 #17101c;
 }
-.card-check .pi { font-size: 12px; font-weight: 900; }
+.card-check .pi { font-size: 9px; font-weight: 900; }
 .retro-card-tooltip .p-tooltip-text {
   background: #ffe66b;
   color: #211729;
