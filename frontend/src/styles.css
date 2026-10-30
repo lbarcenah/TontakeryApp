@@ -1,31 +1,19 @@
 @import "tailwindcss";
 @import "primeicons/primeicons.css";
-:root {
-  font-family: "Segoe UI", system-ui, sans-serif;
-  color: #29372d;
-  background: #f8f9f2;
-  color-scheme: light;
-  --p-primary-color: #426342;
-  --p-primary-hover-color: #334f33;
-  --p-primary-active-color: #273f27;
-  --p-primary-contrast-color: #ffffff;
-  --p-button-border-radius: 10px;
-}
-body {
-  margin: 0;
-}
-* {
-  box-sizing: border-box;
-}
-button,
-textarea,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-textarea {
-  font-family: inherit;
-}
-:focus-visible {
-  outline: 3px solid #8ba56c;
-  outline-offset: 3px;
-}
+:root { font-family: "Trebuchet MS", "Segoe UI", sans-serif; color: #211729; background: #ef9bd8; color-scheme: light; --p-button-border-radius: 3px; }
+body { margin: 0; background-image: radial-gradient(#21172918 1px, transparent 1px); background-size: 18px 18px; }
+* { box-sizing: border-box; }
+button, textarea, a { -webkit-tap-highlight-color: transparent; }
+textarea { font-family: inherit; }
+:focus-visible { outline: 3px solid #7436ac; outline-offset: 4px; }
+::selection { background: #ffe66b; color: #211729; }
+.site-shell .p-button { border: 2px solid #211729; box-shadow: 3px 3px 0 #211729; font-weight: 800; }
+.site-shell .p-button:not(:disabled):hover { transform: translate(1px, 1px); box-shadow: 2px 2px 0 #211729; }
+.site-shell .p-button-text { background: #fff9ec; color: #211729; }
+.site-shell .p-button-outlined { background: #ffe66b; color: #211729; }
+.site-shell .p-inputtext, .site-shell .p-textarea { border: 2px solid #211729; border-radius: 2px; background: #fffdf5; color: #211729; }
+.p-dialog.p-component { border: 3px solid #211729; border-radius: 3px; box-shadow: 8px 8px 0 #211729; background: #fff9ec; }
+.p-dialog .p-dialog-header { background: #ba8cf0; border-bottom: 2px solid #211729; }
+.p-dialog .p-dialog-title { color: #211729; font-weight: 900; }
+.p-dialog-content { padding-top: 20px; }
+@media (prefers-reduced-motion: reduce) { .site-shell .p-button { transition: none; } }

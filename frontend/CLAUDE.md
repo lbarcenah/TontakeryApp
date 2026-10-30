@@ -1,6 +1,6 @@
 # Frontend development
 
-Tontakery uses Angular 21 standalone components, zoneless change detection and signals, PrimeNG with the custom green Lara preset, Tailwind 4, and ngx-translate (Spanish default, English supported).
+Tontakery uses Angular 21 standalone components, zoneless change detection and signals, PrimeNG with the custom purple Lara preset and a 90s Memphis theme (pink, turquoise, purple and yellow, black borders and offset shadows), Tailwind 4, and ngx-translate (Spanish default, English supported).
 
 Run `npm ci`, `npm start`, and `npm run build` in this directory. `npm start` proxies `/api` to localhost:3000. See ../README.md for Docker and browser integration tests.
 
