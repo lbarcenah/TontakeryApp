@@ -1,0 +1,8 @@
+node_modules
+dist
+.angular
+.git
+.env
+.env.*
+!*.example
+test_reports

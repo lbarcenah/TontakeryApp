@@ -1,0 +1,31 @@
+@import "tailwindcss";
+@import "primeicons/primeicons.css";
+:root {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: #29372d;
+  background: #f8f9f2;
+  color-scheme: light;
+  --p-primary-color: #426342;
+  --p-primary-hover-color: #334f33;
+  --p-primary-active-color: #273f27;
+  --p-primary-contrast-color: #ffffff;
+  --p-button-border-radius: 10px;
+}
+body {
+  margin: 0;
+}
+* {
+  box-sizing: border-box;
+}
+button,
+textarea,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+textarea {
+  font-family: inherit;
+}
+:focus-visible {
+  outline: 3px solid #8ba56c;
+  outline-offset: 3px;
+}

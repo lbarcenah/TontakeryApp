@@ -1,0 +1,70 @@
+services:
+  db:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: tontakery
+      POSTGRES_PASSWORD: tontakery
+      POSTGRES_DB: tontakery
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tontakery -d tontakery"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+  backend:
+    build:
+      context: ./backend/api
+      target: development
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: postgres://tontakery:tontakery@db:5432/tontakery
+      APP_ORIGIN: ${DEV_APP_ORIGIN:-http://localhost:4200}
+      ENABLE_TRIAL_LOGIN: ${ENABLE_TRIAL_LOGIN:-true}
+      DEV_ALLOWED_ORIGINS: ${DEV_ALLOWED_ORIGINS:-http://192.168.150.109:4200}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:-}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:-}
+    ports:
+      - "127.0.0.1:3000:3000"
+    volumes:
+      - ./backend/api/src:/app/src
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q -O /dev/null http://127.0.0.1:3000/api/health || exit 1",
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+  frontend:
+    build:
+      context: ./frontend
+      target: development
+    command:
+      [
+        "npm",
+        "start",
+        "--",
+        "--host",
+        "0.0.0.0",
+        "--poll",
+        "1000",
+        "--proxy-config",
+        "proxy.docker.json",
+      ]
+    ports:
+      - "0.0.0.0:4200:4200"
+    volumes:
+      - ./frontend/src:/app/src
+      - ./frontend/public:/app/public
+    depends_on:
+      backend:
+        condition: service_healthy
+volumes:
+  postgres_dev_data:

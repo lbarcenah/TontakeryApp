@@ -1,0 +1,300 @@
+<div class="site-shell">
+  <header class="topbar">
+    <a class="brand" href="/" aria-label="Tontakery"
+      ><span class="brand-icon">t.</span> tontakery<span class="brand-dot">✳</span></a
+    >
+    <div class="top-actions">
+      <p-button
+        [label]="i18n.getCurrentLang() === 'es' ? 'EN' : 'ES'"
+        [text]="true"
+        (onClick)="switchLanguage()"
+      />
+      @if (user(); as u) {
+        <span class="user-name">{{ u.name }}</span
+        ><p-button
+          icon="pi pi-sign-out"
+          [text]="true"
+          [ariaLabel]="'tk.logout' | translate"
+          (onClick)="logout()"
+        />
+      }
+    </div>
+  </header>
+  @if (error()) {
+    <div class="error-banner" role="alert">
+      {{ "tk.errors." + error() | translate }}
+      <p-button
+        icon="pi pi-times"
+        [text]="true"
+        [ariaLabel]="'tk.dismiss' | translate"
+        (onClick)="error.set('')"
+      />
+    </div>
+  }
+  @if (loading()) {
+    <main class="loading" role="status">
+      <i class="pi pi-spin pi-spinner"></i> {{ "tk.loading" | translate }}
+    </main>
+  } @else if (!user()) {
+    <main class="login-layout">
+      <section class="login-copy">
+        <span class="eyebrow">{{ "tk.department" | translate }}</span>
+        <h1>
+          {{ "tk.hero1" | translate }}<br /><em>{{ "tk.hero2" | translate }}</em>
+        </h1>
+        <p class="intro">{{ "tk.intro" | translate }}</p>
+        <a class="google-button" href="/api/auth/google"
+          ><i aria-hidden="true" class="pi pi-google"></i>{{ "tk.login" | translate
+          }}<i aria-hidden="true" class="pi pi-arrow-up-right"></i
+        ></a>
+        <p class="corporate">{{ "tk.corporate" | translate }}</p>
+        @if (trialEnabled()) {
+          <form class="trial-login" (ngSubmit)="enterTrial()" #trialForm="ngForm">
+            <h2>{{ "tk.trialTitle" | translate }}</h2>
+            <p>{{ "tk.trialNotice" | translate }}</p>
+            <label for="trial-email">{{ "tk.trialEmail" | translate }}</label>
+            <input
+              pInputText
+              id="trial-email"
+              name="trialEmail"
+              type="email"
+              email
+              required
+              maxlength="254"
+              autocomplete="email"
+              [(ngModel)]="trialEmail"
+              placeholder="nombre@vicomtech.org"
+            />
+            <p-button
+              type="submit"
+              [label]="'tk.trialEnter' | translate"
+              [disabled]="!trialForm.valid || busy()"
+              [loading]="busy()"
+            />
+          </form>
+        }
+      </section>
+      <section class="login-art" aria-hidden="true">
+        <span class="orbit">✳</span>
+        <div class="art-note">
+          <span>01 / Tontakery</span>
+          <p>{{ "tk.artQuote" | translate }}</p>
+          <div class="art-bottom">{{ "tk.anonymous" | translate }} <span>♡</span></div>
+        </div>
+        <div class="art-sticker">09:00<br /><small>Europe/Madrid</small></div>
+      </section>
+      <section class="rules-grid">
+        <article>
+          <span>01</span>
+          <h2>{{ "tk.rule1title" | translate }}</h2>
+          <p>{{ "tk.rule1" | translate }}</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h2>{{ "tk.rule2title" | translate }}</h2>
+          <p>{{ "tk.rule2" | translate }}</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h2>{{ "tk.rule3title" | translate }}</h2>
+          <p>{{ "tk.rule3" | translate }}</p>
+        </article>
+      </section>
+    </main>
+  } @else {
+    <main class="workspace">
+      <div class="page-heading">
+        <div>
+          <span class="eyebrow">{{ "tk.department" | translate }}</span>
+          <h1>
+            {{ (view() === "chat" ? "tk.chatTitle" : "tk.historyTitle") | translate
+            }}<span class="accent">.</span>
+          </h1>
+        </div>
+        <p-button
+          [icon]="view() === 'chat' ? 'pi pi-trophy' : 'pi pi-arrow-left'"
+          [label]="(view() === 'chat' ? 'tk.history' : 'tk.back') | translate"
+          [ariaLabel]="(view() === 'chat' ? 'tk.history' : 'tk.back') | translate"
+          [outlined]="true"
+          (onClick)="view() === 'chat' ? showHistory() : showChat()"
+        />
+      </div>
+      @if (view() === "chat") {
+        <div class="chat-grid">
+          <section class="chat-panel">
+            <div class="chat-toolbar">
+              <span
+                ><span class="status-dot" [class.offline]="!connected()"></span
+                >{{ (connected() ? "tk.live" : "tk.reconnecting") | translate }}</span
+              ><span>{{ "tk.anonymousChat" | translate }}</span>
+            </div>
+            <div class="messages" aria-live="polite" aria-relevant="additions">
+              @for (m of round()?.messages || []; track m.id) {
+                <article class="message" [class.own]="m.mine">
+                  <div class="message-meta">
+                    <span class="avatar">{{ m.mine ? "✦" : "?" }}</span
+                    ><span>{{ (m.mine ? "tk.yourPhrase" : "tk.anonymous") | translate }}</span
+                    ><time>{{ formatDate(m.createdAt, true) }}</time>
+                  </div>
+                  <p>{{ m.body }}</p>
+                  <div class="message-bottom">
+                    @if (m.mine) {
+                      <span>{{ "tk.onlyYouKnow" | translate }}</span>
+                    } @else {
+                      <p-button
+                        [icon]="round()?.voteId === m.id ? 'pi pi-heart-fill' : 'pi pi-heart'"
+                        [label]="(round()?.voteId === m.id ? 'tk.voted' : 'tk.vote') | translate"
+                        [ariaLabel]="
+                          (round()?.voteId === m.id ? 'tk.voted' : 'tk.vote') | translate
+                        "
+                        [outlined]="round()?.voteId !== m.id"
+                        [disabled]="busy() || ended()"
+                        (onClick)="vote(m.id)"
+                      />
+                    }
+                  </div>
+                </article>
+              } @empty {
+                <div class="empty-state">
+                  <span>✳</span>
+                  <h2>{{ "tk.emptyTitle" | translate }}</h2>
+                  <p>{{ "tk.emptyBody" | translate }}</p>
+                </div>
+              }
+            </div>
+            <div class="composer">
+              <label for="phrase">{{ "tk.yourTurn" | translate }}</label
+              ><textarea
+                pTextarea
+                id="phrase"
+                [(ngModel)]="draft"
+                [maxlength]="1000"
+                rows="3"
+                [placeholder]="'tk.placeholder' | translate"
+                [disabled]="!round() || round()!.remaining === 0 || ended() || busy()"
+              ></textarea>
+              <div class="composer-bottom">
+                <span
+                  >{{ draftLength }} / 500 ·
+                  {{ "tk.remaining" | translate: { count: round()?.remaining || 0 } }}</span
+                ><p-button
+                  icon="pi pi-arrow-up"
+                  [label]="'tk.publish' | translate"
+                  [ariaLabel]="'tk.publish' | translate"
+                  [disabled]="
+                    !draft.trim() ||
+                    draftLength > 500 ||
+                    !round() ||
+                    round()!.remaining === 0 ||
+                    ended() ||
+                    busy()
+                  "
+                  (onClick)="confirm()"
+                />
+              </div>
+              @if (round()?.remaining === 0) {
+                <p class="composer-hint">{{ "tk.usedAll" | translate }}</p>
+              }
+            </div>
+          </section>
+          <aside class="sidebar">
+            <section class="deadline-card">
+              <span class="eyebrow">{{ "tk.nextReveal" | translate }}</span
+              ><strong>{{ count() }}</strong>
+              <p>{{ "tk.closesAt" | translate }}</p>
+              <span class="small-star">✳</span>
+            </section>
+            <section class="winner-card">
+              <span class="eyebrow"
+                ><i aria-hidden="true" class="pi pi-trophy"></i>
+                {{ "tk.previous" | translate }}</span
+              >
+              @if (previous(); as result) {
+                <time>{{ formatDate(result.endsAt) }}</time>
+                @for (w of result.winners; track $index) {
+                  <blockquote>“{{ w.body }}”</blockquote>
+                  <div class="winner-name">
+                    {{ w.authorName }}
+                    <span>· {{ "tk.votes" | translate: { count: w.votes } }}</span>
+                  </div>
+                } @empty {
+                  <p>{{ "tk.noWinner" | translate }}</p>
+                }
+              } @else {
+                <p>{{ "tk.firstRound" | translate }}</p>
+              }
+            </section>
+            <section class="mini-rules">
+              <h2>{{ "tk.rules" | translate }}</h2>
+              <p><span>01</span>{{ "tk.rule1" | translate }}</p>
+              <p><span>02</span>{{ "tk.rule2" | translate }}</p>
+              <p><span>03</span>{{ "tk.rule3" | translate }}</p>
+              <p class="privacy-note"><i class="pi pi-lock"></i>{{ "tk.privacy" | translate }}</p>
+            </section>
+          </aside>
+        </div>
+      } @else {
+        <p class="history-intro">{{ "tk.historyIntro" | translate }}</p>
+        <div class="history-grid">
+          @for (result of history().items; track result.id) {
+            <article class="history-card">
+              <div class="history-date">
+                <span>✦</span><time>{{ formatDate(result.endsAt) }}</time>
+              </div>
+              @for (w of result.winners; track $index) {
+                <blockquote>“{{ w.body }}”</blockquote>
+                <div class="winner-name">
+                  {{ w.authorName }}<span>{{ "tk.votes" | translate: { count: w.votes } }}</span>
+                </div>
+              } @empty {
+                <p>{{ "tk.noWinner" | translate }}</p>
+              }
+            </article>
+          } @empty {
+            <div class="empty-state">
+              <span aria-hidden="true" class="pi pi-trophy"></span>
+              <h2>{{ "tk.noHistory" | translate }}</h2>
+              <p>{{ "tk.firstRound" | translate }}</p>
+            </div>
+          }
+        </div>
+        <nav class="pagination" [attr.aria-label]="'tk.history' | translate">
+          <p-button
+            icon="pi pi-arrow-left"
+            [label]="'tk.previousPage' | translate"
+            [outlined]="true"
+            [disabled]="page() === 0"
+            (onClick)="loadHistory(page() - 1)"
+          /><span>{{ page() + 1 }}</span
+          ><p-button
+            icon="pi pi-arrow-right"
+            [label]="'tk.nextPage' | translate"
+            [outlined]="true"
+            [disabled]="!history().hasMore"
+            (onClick)="loadHistory(page() + 1)"
+          />
+        </nav>
+      }
+    </main>
+  }
+  <footer>Tontakery <span>·</span> {{ "tk.footer" | translate }}</footer>
+</div>
+<p-dialog
+  [(visible)]="confirming"
+  [modal]="true"
+  [header]="'tk.confirmTitle' | translate"
+  [style]="{ width: 'min(92vw, 480px)' }"
+  [closable]="!busy()"
+  ><p>{{ "tk.confirmBody" | translate }}</p>
+  <blockquote class="confirm-phrase">{{ draft.trim() }}</blockquote>
+  <ng-template #footer
+    ><p-button
+      [label]="'tk.cancel' | translate"
+      [text]="true"
+      [disabled]="busy()"
+      (onClick)="confirming = false" /><p-button
+      [label]="'tk.publish' | translate"
+      [ariaLabel]="'tk.publish' | translate"
+      [loading]="busy()"
+      (onClick)="publish()" /></ng-template
+></p-dialog>

@@ -1,0 +1,54 @@
+# Compiled output
+**/node_modules/
+**/dist/
+**/__pycache__/
+*.pyc
+.build
+
+# Logs
+*/**/logs/
+*.log*
+
+# OS
+.DS_Store
+
+# Tests
+coverage/
+.nyc_output
+
+# IDEs
+/.idea
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# IDE - VSCode
+!.vscode/
+*/**/.vscode/
+*.code-workspace
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Secrets
+**/*.env*
+!.env.template
+**/*.crt
+**/*.key
+**/*.pem
+
+# Virtual environments
+**/*venv*/
+**/*env*/
+
+# Other
+*/**/.gitignore
+**/backend/api/prisma/seeds/*.csv
+
+!.env.example
+test_reports/
